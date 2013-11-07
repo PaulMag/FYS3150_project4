@@ -6,12 +6,20 @@
 using namespace arma;
 
 vec backwardEuler(int n, double time, double dt) {
+    /* @param n Resolution in position: n = 1/dt
+     * @param time How long to integrate.
+     * @param dt Timestep.
+     *
+     * The _alt extension on a vec means that it is altered through row
+     * reduction. u_new( is how u looks in the next timestep, what we want to
+     * find.
+     */
 
     double alpha = dt * (n+1) * (n+1); // alpha = dt / dx^2
 
     vec a(n);
     vec b(n);
-    vec b_new(n);
+    vec b_alt(n);
     vec c(n);
 
     // Fill in arrays:
@@ -20,43 +28,37 @@ vec backwardEuler(int n, double time, double dt) {
         b(i) = 1 + 2 * alpha;
         c(i) = -alpha;
     }
-    a(0)   = 0; // parts that "stick outside" matrix
-    c(n-1) = 0; // no point in this a.t.m.
 
     // Initial value:
     vec u = zeros<vec>(n); // previous timestep
-    u(0)  = 1;
-    vec u_new(n);
-    vec v(n); // next timestep
-    v(0)  = u(0);
+    double u0  = 1.0;      // this is the element before u(0)
+    vec u_alt(n);
+    vec u_new(n); // next timestep
 
-    cout << u << endl; // for testing
 
     // Time loop:
     for (double j=0; j*dt < time; j++) {
 
         // Algorithm:
-        b_new(0) = b(0);
-        u_new(0) = u(0);
+        b_alt(0) = b(0);
+        u_alt(0) = u(0) - u0 * a(0);
 
         for (int i=1; i<n; i++) {
-            double factor = a(i) / b_new(i-1); // avoids doing this twice
+            double factor = a(i) / b_alt(i-1); // avoids doing this twice
 
-            b_new(i) = b(i) - c(i-1) * factor;
-
-            u_new(i) = u(i) - u_new(i-1) * factor;
+            b_alt(i) = b(i) - factor * c(i-1);
+            u_alt(i) = u(i) - factor * u_alt(i-1);
         }
 
-        v(n-1) = u(n-1) / b_new(n-1);
-        for (int i=n-2; i>0; i--) {
-            v(i) = (u_new(i) - v(i+1) * c(i)) / b_new(i); //unsure which c,no matter
+        u_new(n-1) = u(n-1) / b_alt(n-1);
+        for (int i=n-2; i>=0; i--) {
+            u_new(i) = (u_alt(i) - u_new(i+1) * c(i)) / b_alt(i);
         }
 
         for (int i=0; i<n; i++) {
-            u(i) = v(i);
+            u(i) = u_new(i);
         }
-        //cout << u << endl; // for testing
     }
 
-    return v;
+    return u_new;
 }
