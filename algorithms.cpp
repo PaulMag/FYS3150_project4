@@ -6,6 +6,35 @@
 using namespace arma;
 
 
+vec analytic(int n, double time) {
+
+    int N = 10000;
+
+    vec u(n+1);
+    vec x(n+1);
+
+    double dx = 1. / n;
+    for (int i=0; i<n+1; i++) { // linspace
+        x(i) = i * dx;
+    }
+
+    double pi  = 3.14159265359;
+    double pi2 = pi * pi;
+
+    for (int i=0; i<n; i++) {
+
+        double s = 0.0;
+
+        for (int k=1; k<=N; k++) {
+            s += sin(k*pi*x(i)) / k * exp(- k*k * pi2 * time);
+        }
+        u(i) =  1 - x(i) - 2./pi * s;
+    }
+
+    return u;
+}
+
+
 vec forwardEuler(int n, double time, double dt) {
 
     double alpha = dt * (n+1) * (n+1); // alpha = dt / dx^2
