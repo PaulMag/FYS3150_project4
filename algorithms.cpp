@@ -5,6 +5,40 @@
 
 using namespace arma;
 
+
+vec forwardEuler(int n, double time, double dt) {
+
+    double alpha = dt * (n+1) * (n+1); // alpha = dt / dx^2
+    if (alpha > 0.5) {
+        cout << "WARNING: alpha = " << alpha << " < 1/2" << endl
+             << "WARNING: Algorithm may be unstable!"    << endl;
+    }
+
+    // Initial value:
+    vec u = zeros<vec>(n); // previous timestep
+    u(0)  = 1.0;
+    vec u_new(n); // next timestep
+    u_new(0)   = u(0);
+    u_new(n-1) = u(n-1);
+
+    // Time loop:
+    for (double j=0; j*dt < time; j++) {
+
+        // Algorithm:
+        for (int i=1; i<n-1; i++) {
+            u_new(i) = u(i) + ( u(i+1) - 2 * u(i) + u(i-1) ) * alpha;
+        }
+
+        // Update:
+        for (int i=0; i<n; i++) {
+            u(i) = u_new(i);
+        }
+    }
+
+    return u;
+}
+
+
 vec backwardEuler(int n, double time, double dt) {
     /* @param n Resolution in position: n = 1/dt
      * @param time How long to integrate.
@@ -30,8 +64,8 @@ vec backwardEuler(int n, double time, double dt) {
     }
 
     // Initial value:
-    vec u = zeros<vec>(n); // previous timestep
-    double u0  = 1.0;      // this is the element before u(0)
+    vec u     = zeros<vec>(n); // previous timestep
+    double u0 = 1.0;      // this is the element before u(0)
     vec u_alt(n);
     vec u_new(n); // next timestep
 
@@ -44,6 +78,7 @@ vec backwardEuler(int n, double time, double dt) {
         u_alt(0) = u(0) - u0 * a(0);
 
         for (int i=1; i<n; i++) {
+            /* Forwards substitution. */
             double factor = a(i) / b_alt(i-1); // avoids doing this twice
 
             b_alt(i) = b(i) - factor * c(i-1);
@@ -52,13 +87,21 @@ vec backwardEuler(int n, double time, double dt) {
 
         u_new(n-1) = u(n-1) / b_alt(n-1);
         for (int i=n-2; i>=0; i--) {
+            /* Backwards substitution. */
             u_new(i) = (u_alt(i) - u_new(i+1) * c(i)) / b_alt(i);
         }
 
+        // Update:
         for (int i=0; i<n; i++) {
             u(i) = u_new(i);
         }
     }
 
-    return u_new;
+    return u;
 }
+
+/*
+vec crankNicolson(int n, double time, double dt) {
+
+}
+*/
