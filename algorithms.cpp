@@ -37,31 +37,30 @@ vec analytic(int n, double time) {
 
 vec forwardEuler(int n, double time, double dt) {
 
-    double alpha = dt * (n+1) * (n+1); // alpha = dt / dx^2
+    double alpha = dt * n * n; // alpha = dt / dx^2
     if (alpha > 0.5) {
         cout << "WARNING: alpha = " << alpha << " < 1/2" << endl
              << "WARNING: Algorithm may be unstable!"    << endl;
     }
 
     // Initial value:
-    vec u = zeros<vec>(n); // previous timestep
+    vec u = zeros<vec>(n+1); // previous timestep
     u(0)  = 1.0;
-    vec u_new(n); // next timestep
-    u_new(0)   = u(0);
-    u_new(n-1) = u(n-1);
+
+    vec u_new(n+1); // next timestep
+    u_new(0) = u(0);
+    u_new(n) = u(n);
 
     // Time loop:
     for (double j=0; j*dt < time; j++) {
 
         // Algorithm:
-        for (int i=1; i<n-1; i++) {
+        for (int i=1; i<n; i++) {
             u_new(i) = u(i) + ( u(i+1) - 2 * u(i) + u(i-1) ) * alpha;
         }
 
         // Update:
-        for (int i=0; i<n; i++) {
-            u(i) = u_new(i);
-        }
+        u = u_new;
     }
 
     return u;
@@ -78,7 +77,7 @@ vec backwardEuler(int n, double time, double dt) {
      * find.
      */
 
-    double alpha = dt * (n+1) * (n+1); // alpha = dt / dx^2
+    double alpha = dt * n * n; // alpha = dt / dx^2
 
     vec a(n);
     vec b(n);
@@ -121,18 +120,23 @@ vec backwardEuler(int n, double time, double dt) {
         }
 
         // Update:
-        for (int i=0; i<n; i++) {
-            u(i) = u_new(i);
-        }
+        u = u_new;
     }
 
-    return u;
+    // Add u0 at the beginning of u:
+    vec u_fin(n+1);
+    for (int i=0; i<n; i++) {
+        u_fin(i+1) = u(i);
+    }
+    u_fin(0) = u0;
+
+    return u_fin;
 }
 
 
 vec crankNicolson(int n, double time, double dt) {
 
-    double alpha = 0.5 * dt * (n+1) * (n+1); // this is alpha/2
+    double alpha = 0.5 * dt * n * n; // this is alpha/2
 
     vec a(n);
     vec b(n);
@@ -182,10 +186,19 @@ vec crankNicolson(int n, double time, double dt) {
         }
 
         // Update:
-        for (int i=0; i<n; i++) {
-            u(i) = u_new(i);
-        }
+        u = u_new;
     }
 
-    return u;
+    // Add u0 at the beginning of u:
+    vec u_fin(n+1);
+    for (int i=0; i<n; i++) {
+        u_fin(i+1) = u(i);
+    }
+    u_fin(0) = u0;
+
+    /* The weirdest bug in the universe is happening somewhere in these last few
+     * lines.
+     */
+
+    return u_fin;
 }
