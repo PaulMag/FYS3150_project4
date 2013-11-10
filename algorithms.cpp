@@ -135,6 +135,11 @@ rowvec backwardEuler(int n, double time, double dt) {
 
 
 rowvec crankNicolson(int n, double time, double dt) {
+    /* Takes half a step with forwardEuler and another half with backwardEuler.
+     * WARNING: Length of the returned vec is only n, because the u0 at the
+     * beginning is missing. This was the only way to fix the weirdest bug in
+     * the universe.
+     */
 
     double alpha = 0.5 * dt * n * n; // this is alpha/2
 
@@ -195,10 +200,16 @@ rowvec crankNicolson(int n, double time, double dt) {
         u_fin(i+1) = u(i);
     }
     u_fin(0) = u0;
+    /* This needs to be done in main.cpp instead of here, or the values of u are
+     * changed slightly. BUT it STILL needs to be done here, just without ever
+     * using u_fin, so it should not matter at alll, but it does. If else, the
+     * values of u are changed slightly...
+     * Only God knows why.
+     */
 
     /* The weirdest bug in the universe is happening somewhere in these last few
      * lines.
      */
 
-    return u_fin;
+    return u;
 }
