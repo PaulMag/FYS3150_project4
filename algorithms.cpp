@@ -6,12 +6,12 @@
 using namespace arma;
 
 
-vec analytic(int n, double time) {
+rowvec analytic(int n, double time) {
 
     int N = 10000;
 
-    vec u(n+1);
-    vec x(n+1);
+    rowvec u(n+1);
+    rowvec x(n+1);
 
     double dx = 1. / n;
     for (int i=0; i<n+1; i++) { // linspace
@@ -35,7 +35,7 @@ vec analytic(int n, double time) {
 }
 
 
-vec forwardEuler(int n, double time, double dt) {
+rowvec forwardEuler(int n, double time, double dt) {
 
     double alpha = dt * n * n; // alpha = dt / dx^2
     if (alpha > 0.5) {
@@ -44,10 +44,10 @@ vec forwardEuler(int n, double time, double dt) {
     }
 
     // Initial value:
-    vec u = zeros<vec>(n+1); // previous timestep
+    rowvec u = zeros<rowvec>(n+1); // previous timestep
     u(0)  = 1.0;
 
-    vec u_new(n+1); // next timestep
+    rowvec u_new(n+1); // next timestep
     u_new(0) = u(0);
     u_new(n) = u(n);
 
@@ -67,22 +67,22 @@ vec forwardEuler(int n, double time, double dt) {
 }
 
 
-vec backwardEuler(int n, double time, double dt) {
+rowvec backwardEuler(int n, double time, double dt) {
     /* @param n Resolution in position: n = 1/dt
      * @param time How long to integrate.
      * @param dt Timestep.
      *
-     * The _alt extension on a vec means that it is altered through row
+     * The _alt extension on a rowvec means that it is altered through row
      * reduction. u_new( is how u looks in the next timestep, what we want to
      * find.
      */
 
     double alpha = dt * n * n; // alpha = dt / dx^2
 
-    vec a(n);
-    vec b(n);
-    vec b_alt(n);
-    vec c(n);
+    rowvec a(n);
+    rowvec b(n);
+    rowvec b_alt(n);
+    rowvec c(n);
 
     // Fill in arrays:
     for (int i=0; i<n; i++) {
@@ -92,10 +92,10 @@ vec backwardEuler(int n, double time, double dt) {
     }
 
     // Initial value:
-    vec u     = zeros<vec>(n); // previous timestep
+    rowvec u     = zeros<rowvec>(n); // previous timestep
     double u0 = 1.0; // this is "u(-1)" the element before u(0)
-    vec u_alt(n);
-    vec u_new(n); // next timestep
+    rowvec u_alt(n);
+    rowvec u_new(n); // next timestep
 
 
     // Time loop:
@@ -124,7 +124,7 @@ vec backwardEuler(int n, double time, double dt) {
     }
 
     // Add u0 at the beginning of u:
-    vec u_fin(n+1);
+    rowvec u_fin(n+1);
     for (int i=0; i<n; i++) {
         u_fin(i+1) = u(i);
     }
@@ -134,14 +134,14 @@ vec backwardEuler(int n, double time, double dt) {
 }
 
 
-vec crankNicolson(int n, double time, double dt) {
+rowvec crankNicolson(int n, double time, double dt) {
 
     double alpha = 0.5 * dt * n * n; // this is alpha/2
 
-    vec a(n);
-    vec b(n);
-    vec b_alt(n);
-    vec c(n);
+    rowvec a(n);
+    rowvec b(n);
+    rowvec b_alt(n);
+    rowvec c(n);
 
     // Fill in arrays:
     for (int i=0; i<n; i++) {
@@ -151,11 +151,11 @@ vec crankNicolson(int n, double time, double dt) {
     }
 
     // Initial value:
-    vec u     = zeros<vec>(n); // previous timestep
+    rowvec u     = zeros<rowvec>(n); // previous timestep
     double u0 = 1.0; // this is "u(-1)" the element before u(0)
-    vec u_alt(n);
-    vec u_mid(n); // half timestep
-    vec u_new(n); // next timestep
+    rowvec u_alt(n);
+    rowvec u_mid(n); // half timestep
+    rowvec u_new(n); // next timestep
 
 
     // Time loop:
@@ -190,7 +190,7 @@ vec crankNicolson(int n, double time, double dt) {
     }
 
     // Add u0 at the beginning of u:
-    vec u_fin(n+1);
+    rowvec u_fin(n+1);
     for (int i=0; i<n; i++) {
         u_fin(i+1) = u(i);
     }
