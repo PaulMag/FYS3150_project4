@@ -3,6 +3,7 @@
 #include <fstream>
 #include <armadillo>
 
+using namespace std;
 using namespace arma;
 
 
@@ -97,6 +98,9 @@ rowvec backwardEuler(int n, double time, double dt) {
     rowvec u_alt(n);
     rowvec u_new(n); // next timestep
 
+    // Outfile:
+    //ofstream outfile;
+    //outfile.open("data/backwardEuler_dx_0.1_dt_5e-5.dat");
 
     // Time loop:
     for (double j=0; j*dt < time; j++) {
@@ -121,7 +125,13 @@ rowvec backwardEuler(int n, double time, double dt) {
 
         // Update:
         u = u_new;
+
+        // Save data:
+        //outfile << "1.0 " << u;
     }
+
+    // Close outfile
+    //outfile.close();
 
     // Add u0 at the beginning of u:
     rowvec u_fin(n+1);
@@ -162,6 +172,10 @@ rowvec crankNicolson(int n, double time, double dt) {
     rowvec u_mid(n); // half timestep
     rowvec u_new(n); // next timestep
 
+    // Outfile:
+    //ofstream outfile;
+    //outfile.open("data/crankNicolson_dx_0.01_dt_5e-3.dat");
+
 
     // Time loop:
     for (double j=0; j*dt < time; j++) {
@@ -192,6 +206,9 @@ rowvec crankNicolson(int n, double time, double dt) {
 
         // Update:
         u = u_new;
+
+        // Save data:
+        //outfile << "1.0 " << u; // Shitty data!!! Shitty bug!!!
     }
 
     // Add u0 at the beginning of u:
@@ -204,12 +221,15 @@ rowvec crankNicolson(int n, double time, double dt) {
      * changed slightly. BUT it STILL needs to be done here, just without ever
      * using u_fin, so it should not matter at alll, but it does. If else, the
      * values of u are changed slightly...
-     * Only God knows why.
+     * Only God knows why. God, why???
      */
 
     /* The weirdest bug in the universe is happening somewhere in these last few
      * lines.
      */
+
+    // Close outfile
+    //outfile.close();
 
     return u;
 }
